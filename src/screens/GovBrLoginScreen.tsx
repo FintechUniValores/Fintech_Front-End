@@ -3,46 +3,55 @@ import {
   View,
   Text,
   StyleSheet,
-  Pressable,
   ActivityIndicator,
-  Alert,
+  // Alert,
   SafeAreaView,
   Image,
 } from 'react-native';
-import {WebView} from 'react-native-webview';
+// import {WebView} from 'react-native-webview';
+import {useNavigation} from '@react-navigation/native';
 import config from '../config/appConfig';
-import Icon from 'react-native-vector-icons/FontAwesome6';
+import ScreenHeader from '../components/ScreenHeader';
+import SecondaryButton from '../components/SecondaryButton';
+import type {StackNavigationProp} from '@react-navigation/stack';
+
+type RootStackParamList = {
+  GovBrRequirements: undefined;
+  SvrConsult: undefined;
+};
 
 function GovBrLoginScreen() {
-  const [showWebView, setShowWebView] = useState(false);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  // const [showWebView, setShowWebView] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [webViewUrl, setWebViewUrl] = useState('');
+  // const [webViewUrl, setWebViewUrl] = useState('');
 
   const handleLoginWithGovBr = async () => {
-    setLoading(true);
-    try {
-      // TODO: Chame o endpoint do seu backend para iniciar o fluxo Gov.br
-      // Ex: const response = await axios.get(`${config.backendUrl}/oauth2/authorization/govbr`);
-      // Assume que o backend retorna a URL de autorização do Gov.br
-      // Por enquanto, vamos simular a URL do Gov.br diretamente para testar a WebView
-      const govBrAuthUrl =
-        'https://sso.acesso.gov.br/authorize?response_type=code&client_id=SEU_CLIENT_ID_GOVBR&scope=openid%20profile%20email&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Flogin%2Foauth2%2Fcode%2Fgovbr&state=algum_estado&nonce=algum_nonce';
+    // setLoading(true);
+    // try {
+    //   // TODO: Chame o endpoint do seu backend para iniciar o fluxo Gov.br
+    //   // Ex: const response = await axios.get(`${config.backendUrl}/oauth2/authorization/govbr`);
+    //   // Assume que o backend retorna a URL de autorização do Gov.br
+    //   // Por enquanto, vamos simular a URL do Gov.br diretamente para testar a WebView
+    //   const govBrAuthUrl =
+    //     'https://sso.acesso.gov.br/authorize?response_type=code&client_id=SEU_CLIENT_ID_GOVBR&scope=openid%20profile%20email&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Flogin%2Foauth2%2Fcode%2Fgovbr&state=algum_estado&nonce=algum_nonce';
 
-      // A URL acima é um placeholder. O ideal é que o backend monte e retorne ela.
-      // A 'redirect_uri' no parâmetro acima DEVE ser a URL do SEU BACKEND (http://localhost:8080/...)
-      // que está configurada para receber o callback do Gov.br.
-      // O seu backend, depois de processar, redirecionará para o Deep Link do seu app.
+    //   // A URL acima é um placeholder. O ideal é que o backend monte e retorne ela.
+    //   // A 'redirect_uri' no parâmetro acima DEVE ser a URL do SEU BACKEND (http://localhost:8080/...)
+    //   // que está configurada para receber o callback do Gov.br.
+    //   // O seu backend, depois de processar, redirecionará para o Deep Link do seu app.
 
-      setWebViewUrl(govBrAuthUrl);
-      setShowWebView(true);
-    } catch (error) {
-      console.error('Erro ao iniciar o login Gov.br:', error);
-      Alert.alert(
-        'Erro',
-        'Não foi possível iniciar o login Gov.br. Tente novamente.',
-      );
-      setLoading(false);
-    }
+    //   setWebViewUrl(govBrAuthUrl);
+    //   setShowWebView(true);
+    // } catch (error) {
+    //   console.error('Erro ao iniciar o login Gov.br:', error);
+    //   Alert.alert(
+    //     'Erro',
+    //     'Não foi possível iniciar o login Gov.br. Tente novamente.',
+    //   );
+    //   setLoading(false);
+    // }
+    navigation.navigate('SvrConsult');
   };
 
   interface NavigationState {
@@ -64,7 +73,7 @@ function GovBrLoginScreen() {
       navState.url.includes(config.backendSuccessRedirectPath) ||
       navState.url.includes(config.backendFailureRedirectPath)
     ) {
-      setShowWebView(false);
+      // setShowWebView(false);
       setLoading(false);
     }
 
@@ -72,50 +81,44 @@ function GovBrLoginScreen() {
     // você pode ter uma lógica para fechar o modal.
   };
 
-  if (showWebView) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <WebView
-          source={{uri: webViewUrl}}
-          onNavigationStateChange={onNavigationStateChange}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          startInLoadingState={true}
-          renderLoading={() => (
-            <ActivityIndicator
-              size={'large'}
-              color={'#CD0B30'}
-              style={styles.loadingOverlay}
-            />
-          )}
-          onError={syntheticEvent => {
-            const {nativeEvent} = syntheticEvent;
-            console.warn('WebView error:', nativeEvent);
-            Alert.alert(
-              'Erro na WebView',
-              'Não foi possível carregar a página: ' + nativeEvent.description,
-            );
-            setShowWebView(false);
-            setLoading(false);
-          }}
-        />
-      </SafeAreaView>
-    );
-  }
+  // if (showWebView) {
+  //   return (
+  //     <SafeAreaView style={styles.safeArea}>
+  //       <WebView
+  //         source={{uri: webViewUrl}}
+  //         onNavigationStateChange={onNavigationStateChange}
+  //         javaScriptEnabled={true}
+  //         domStorageEnabled={true}
+  //         startInLoadingState={true}
+  //         renderLoading={() => (
+  //           <ActivityIndicator
+  //             size={'large'}
+  //             color={'#CD0B30'}
+  //             style={styles.loadingOverlay}
+  //           />
+  //         )}
+  //         onError={syntheticEvent => {
+  //           const {nativeEvent} = syntheticEvent;
+  //           console.warn('WebView error:', nativeEvent);
+  //           Alert.alert(
+  //             'Erro na WebView',
+  //             'Não foi possível carregar a página: ' + nativeEvent.description,
+  //           );
+  //           setShowWebView(false);
+  //           setLoading(false);
+  //         }}
+  //       />
+  //     </SafeAreaView>
+  //   );
+  // }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Image
-          source={require('../assets/background.png')}
-          style={styles.backgroundImage}
-          resizeMode="cover"
+        <ScreenHeader
+          title="Acesso Seguro"
+          subtitle="Conecte-se com sua conta Gov.br"
         />
-        <View style={styles.divider} />
-        <View style={styles.top}>
-          <Text style={styles.title}>Acesso Seguro</Text>
-          <Text style={styles.subtitle}>Conecte-se com sua conta Gov.br</Text>
-        </View>
 
         {loading ? (
           <ActivityIndicator size={'large'} color={'#CD0B30'} />
@@ -126,15 +129,11 @@ function GovBrLoginScreen() {
               style={styles.govBrLogo}
               resizeMode="contain"
             />
-            <Pressable style={styles.button} onPress={handleLoginWithGovBr}>
-              <Text style={styles.buttonText}>Entrar com Gov.br</Text>
-              <Icon
-                name="arrow-up-right-from-square"
-                size={20}
-                color="#CD0B30"
-                style={styles.buttonIcon}
-              />
-            </Pressable>
+            <SecondaryButton
+              text="Entrar com Gov.br"
+              icon="arrow-right"
+              onPress={handleLoginWithGovBr}
+            />
           </View>
         )}
         <Text style={styles.adviser}>
@@ -155,38 +154,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  backgroundImage: {
-    width: '100%',
-    height: 250,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-  },
-  divider: {
-    width: '90%',
-    height: 1,
-    backgroundColor: '#FFFFFF',
-    marginTop: 90,
-    marginBottom: 10,
-  },
-  top: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    textAlign: 'center',
   },
   center: {
     flex: 1,
@@ -198,24 +165,6 @@ const styles = StyleSheet.create({
     width: 250,
     height: 90,
     marginBottom: 20,
-  },
-  button: {
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#CD0B30',
-    width: 250,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#CD0B30',
-    fontSize: 16,
-  },
-  buttonIcon: {
-    marginLeft: 20,
   },
   loadingOverlay: {
     position: 'absolute',
