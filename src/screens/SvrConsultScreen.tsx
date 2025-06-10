@@ -1,10 +1,11 @@
 import React from 'react';
 import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {lightTheme} from '../config/themes';
 import PrimaryButton from '../components/PrimaryButton';
 import MainScreenHeader from '../components/MainScreenHeader';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {useTheme} from '../contexts/ThemeContext';
+import {createCommonStyles} from '../styles/common';
 
 type RootStackParamList = {
   PosConsult: undefined;
@@ -12,6 +13,8 @@ type RootStackParamList = {
 
 function SvrConsultScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {colors} = useTheme();
+  const styles = createStyles(colors);
 
   const handleConsultSVR = () => {
     // Lógica futura: Abrir a WebView com a URL do SVR do Banco Central.
@@ -22,14 +25,14 @@ function SvrConsultScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <MainScreenHeader title="Consultar Valores" />
-      <View style={styles.container}>
+      <View style={styles.pageContainer}>
         <View style={styles.center}>
           <Text style={styles.title}>Pronto para consultar?</Text>
           <Text style={styles.subtitle}>
             Clique abaixo para ser direcionado ao site oficial do Banco Central
             e verificar se você tem valores a receber.
           </Text>
-          <Text style={styles.info}>
+          <Text style={styles.infoText}>
             Lembre-se de retornar ao nosso aplicativo após a consulta!
           </Text>
           <PrimaryButton
@@ -44,42 +47,22 @@ function SvrConsultScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: lightTheme.backgroundColor,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    marginTop: 150,
-    paddingHorizontal: 20,
-    width: '100%',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333333',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: lightTheme.text,
-    lineHeight: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  info: {
-    fontSize: 14,
-    color: lightTheme.primary,
-    marginBottom: 20,
-  },
-});
+const createStyles = (colors: any) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      marginTop: 150,
+      paddingHorizontal: 20,
+      width: '100%',
+    },
+    title: {
+      ...commonStyles.title,
+      fontSize: 24,
+    },
+  });
+};
 
 export default SvrConsultScreen;

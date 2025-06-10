@@ -14,6 +14,8 @@ import config from '../config/appConfig';
 import ScreenHeader from '../components/ScreenHeader';
 import SecondaryButton from '../components/SecondaryButton';
 import type {StackNavigationProp} from '@react-navigation/stack';
+import {useTheme} from '../contexts/ThemeContext';
+import {createCommonStyles} from '../styles/common';
 
 type RootStackParamList = {
   GovBrRequirements: undefined;
@@ -22,6 +24,8 @@ type RootStackParamList = {
 
 function GovBrLoginScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {colors} = useTheme();
+  const styles = createStyles(colors);
   // const [showWebView, setShowWebView] = useState(false);
   const [loading, setLoading] = useState(false);
   // const [webViewUrl, setWebViewUrl] = useState('');
@@ -114,12 +118,11 @@ function GovBrLoginScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <View style={styles.pageContainer}>
         <ScreenHeader
           title="Acesso Seguro"
           subtitle="Conecte-se com sua conta Gov.br"
         />
-
         {loading ? (
           <ActivityIndicator size={'large'} color={'#CD0B30'} />
         ) : (
@@ -145,46 +148,45 @@ function GovBrLoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  center: {
-    flex: 1,
-    marginTop: -120,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  govBrLogo: {
-    width: 250,
-    height: 90,
-    marginBottom: 20,
-  },
-  loadingOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    zIndex: 10,
-  },
-  adviser: {
-    fontSize: 14,
-    color: '#CD0B30',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-    paddingHorizontal: 20,
-  },
-});
+const createStyles = (colors: any) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
+    pageContainer: {
+      ...commonStyles.pageContainer,
+      paddingHorizontal: 0,
+    },
+    center: {
+      flex: 1,
+      marginTop: -120,
+      alignItems: 'center',
+      paddingHorizontal: 10,
+    },
+    govBrLogo: {
+      width: 250,
+      height: 90,
+      marginBottom: 20,
+    },
+    loadingOverlay: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(255,255,255,0.7)',
+      zIndex: 10,
+    },
+    adviser: {
+      fontSize: 14,
+      color: '#CD0B30',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 30,
+      paddingHorizontal: 20,
+    },
+  });
+};
 
 export default GovBrLoginScreen;

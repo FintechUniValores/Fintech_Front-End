@@ -5,6 +5,8 @@ import {lightTheme} from '../config/themes';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import ScreenHeader from '../components/ScreenHeader';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {useTheme} from '../contexts/ThemeContext';
+import {createCommonStyles} from '../styles/common';
 
 type RootStackParamList = {
   GovBrLogin: undefined;
@@ -12,10 +14,12 @@ type RootStackParamList = {
 
 function GovBrRequirementsScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {colors} = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <View style={styles.pageContainer}>
         <ScreenHeader
           title="Atenção!"
           subtitle="Sua conta Gov.br precisa de ajustes"
@@ -47,7 +51,7 @@ function GovBrRequirementsScreen() {
                 name="arrow-right"
                 size={15}
                 color={lightTheme.primary}
-                style={{marginLeft: 5}}
+                style={styles.iconRight}
               />
             </Pressable>
           </View>
@@ -72,7 +76,7 @@ function GovBrRequirementsScreen() {
                 name="arrow-right"
                 size={15}
                 color={lightTheme.primary}
-                style={{marginLeft: 5}}
+                style={styles.iconRight}
               />
             </Pressable>
           </View>
@@ -82,63 +86,53 @@ function GovBrRequirementsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: lightTheme.backgroundColor,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  center: {
-    alignItems: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 20,
-    width: '100%',
-  },
-  paragraph: {
-    fontSize: 16,
-    color: lightTheme.text,
-    lineHeight: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: lightTheme.cardBackgroundColor,
-    borderRadius: 15,
-    padding: 20,
-    width: '100%',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: lightTheme.text,
-    marginBottom: 10,
-  },
-  cardText: {
-    fontSize: 16,
-    color: lightTheme.text,
-    lineHeight: 24,
-    marginBottom: 10,
-  },
-  cardButton: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardButtonText: {
-    fontSize: 16,
-    color: lightTheme.primary,
-  },
-});
+const createStyles = (colors: any) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
+    pageContainer: {
+      ...commonStyles.pageContainer,
+      paddingHorizontal: 0,
+    },
+    center: {
+      alignItems: 'center',
+      paddingVertical: 80,
+      paddingHorizontal: 20,
+      width: '100%',
+    },
+    paragraph: {
+      fontSize: 16,
+      color: lightTheme.text,
+      lineHeight: 24,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: lightTheme.text,
+      marginBottom: 10,
+    },
+    cardText: {
+      fontSize: 16,
+      color: lightTheme.text,
+      lineHeight: 24,
+      marginBottom: 10,
+    },
+    cardButton: {
+      alignSelf: 'flex-end',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cardButtonText: {
+      fontSize: 16,
+      color: lightTheme.primary,
+    },
+    iconRight: {
+      marginLeft: 5,
+    },
+  });
+};
 
 export default GovBrRequirementsScreen;
