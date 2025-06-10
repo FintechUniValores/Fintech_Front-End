@@ -10,11 +10,11 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/FontAwesome6';
 import MainScreenHeader from '../../components/MainScreenHeader';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-
+import {createCommonStyles} from '../../styles/common';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
 
@@ -41,12 +41,12 @@ const guideData = [
       'Entre em contato diretamente com a instituição financeira pelo telefone ou pelo e-mail informado por ela para combinar a forma de devolução. Nesse caso, a instituição financeira não é obrigada a devolver o valor em até 12 dias úteis; ou se preferir, crie uma chave Pix e volte ao sistema para solicitar o valor.',
   },
   {
-    title: 'Não Ofereceu Solicitar aqui',
+    title: 'Não Ofereceu Solicitar Aqui',
     content:
       'Entre em contato diretamente com a instituição financeira pelo telefone ou pelo e-mail informado por ela para combinar a forma de devolução. Nesse caso, a instituição financeira não é obrigada a devolver o valor em até 12 dias úteis.',
   },
   {
-    title: 'Observação sobre valores acima de R$ 100 e 2FA',
+    title: 'Observação Sobre Valores Acima De R$ 100 E 2FA',
     content:
       'Entre no seu aplicativo gov.br e ative o duplo fator de autenticação, depois acesse novamente o SVR e solicite o resgate do valor normalmente.',
   },
@@ -69,10 +69,11 @@ const AccordionItem: React.FC<AccordionItemProps> = ({item, colors}) => {
   return (
     <View style={styles.accordionContainer}>
       <Pressable style={styles.accordionHeader} onPress={toggleExpand}>
+        <Icon name="pix" size={24} color={colors.primary} />
         <Text style={styles.accordionTitle}>{item.title}</Text>
         <Icon
           name={expanded ? 'chevron-up' : 'chevron-down'}
-          size={25}
+          size={24}
           color={colors.primary}
         />
       </Pressable>
@@ -97,63 +98,56 @@ function GuideScreen() {
         icon="gear"
         onIconPress={() => navigation.navigate('Settings')}
       />
-      <ScrollView contentContainerStyle={styles.container}>
-        {guideData.map((item, index) => (
-          <AccordionItem key={index} item={item} colors={colors} />
-        ))}
-      </ScrollView>
+      <View style={styles.pageContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.title}>Como Resgatar Seus Valores</Text>
+          <Text style={styles.subtitle}>
+            Esperamos que você tenha encontrado boas notícias Agora, veja como
+            resgatar:
+          </Text>
+          {guideData.map((item, index) => (
+            <AccordionItem key={index} item={item} colors={colors} />
+          ))}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
-const createStyles = (colors: Theme) =>
-  StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: colors.backgroundColor,
-    },
-    container: {
-      width: '100%',
-      alignItems: 'center',
-      marginTop: 50,
-    },
+const createStyles = (colors: Theme) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
     accordionContainer: {
       backgroundColor: colors.cardBackgroundColor,
       borderRadius: 24,
-      marginBottom: 20,
+      marginBottom: 15,
       overflow: 'hidden',
-      width: '90%',
-      minHeight: 52,
-      shadowColor: '#333333',
-      shadowOffset: {
-        width: 0,
-        height: 8,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 6,
-      elevation: 10,
+      borderWidth: 2,
+      borderColor: colors.primary,
     },
     accordionHeader: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 10,
+      padding: 15,
     },
     accordionTitle: {
       flex: 1,
       fontSize: 20,
+      textAlign: 'center',
       fontWeight: 'bold',
       color: colors.text,
     },
     accordionContent: {
       paddingHorizontal: 20,
-      paddingBottom: 10,
+      paddingBottom: 15,
     },
     accordionText: {
       fontSize: 14,
-      color: colors.text,
+      color: colors.secondaryText,
       lineHeight: 21,
     },
   });
+};
 
 export default GuideScreen;

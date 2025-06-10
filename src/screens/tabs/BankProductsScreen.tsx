@@ -3,8 +3,8 @@ import {View, Text, StyleSheet, SafeAreaView, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-
 import MainScreenHeader from '../../components/MainScreenHeader';
+import {createCommonStyles} from '../../styles/common';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
 
@@ -75,11 +75,9 @@ function BankProductsScreen() {
         icon="gear"
         onIconPress={() => navigation.navigate('Settings')}
       />
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.mainTitle}>
-            Otimize Seus Valores com Bradesco
-          </Text>
+      <View style={styles.pageContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.title}>Otimize Seus Valores com Bradesco</Text>
           <Text style={styles.subtitle}>
             Recebeu valores? Centralize seu dinheiro em sua conta e descubra
             novas oportunidades para ele render!
@@ -89,7 +87,7 @@ function BankProductsScreen() {
               <ProductCard key={index} product={product} colors={colors} />
             ))}
           </View>
-          <Text style={styles.disclaimer}>
+          <Text style={styles.infoText}>
             As informações são sugestões. Consulte um especialista para decisões
             financeiras personalizadas.
           </Text>
@@ -99,49 +97,26 @@ function BankProductsScreen() {
   );
 }
 
-const createStyles = (colors: Theme) =>
-  StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: colors.backgroundColor,
+const createStyles = (colors: Theme) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
+    pageContainer: {
+      ...commonStyles.pageContainer,
+      padding: 10,
     },
-    container: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    scrollContent: {
-      paddingHorizontal: 20,
-      paddingBottom: 20,
-    },
-    mainTitle: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      color: colors.text,
-      textAlign: 'center',
-      marginTop: 20,
-    },
-    subtitle: {
-      fontSize: 16,
-      color: colors.text,
-      textAlign: 'center',
-      marginTop: 8,
-      marginBottom: 30,
+    scrollContainer: {
+      ...commonStyles.scrollContainer,
+      paddingHorizontal: 10,
     },
     cardsRow: {
       flexDirection: 'row',
-      justifyContent: 'space-around',
+      justifyContent: 'space-between',
     },
     card: {
-      backgroundColor: colors.cardBackgroundColor,
-      borderRadius: 15,
-      padding: 15,
+      ...commonStyles.card,
       width: '48%',
       alignItems: 'flex-start',
-      shadowColor: '#333333',
-      shadowOffset: {width: 0, height: 8},
-      shadowOpacity: 0.25,
-      shadowRadius: 6,
-      elevation: 10,
     },
     cardTitle: {
       fontSize: 18,
@@ -164,13 +139,7 @@ const createStyles = (colors: Theme) =>
       color: colors.primary,
       alignSelf: 'flex-end',
     },
-    disclaimer: {
-      fontSize: 14,
-      color: colors.primary,
-      textAlign: 'center',
-      marginTop: 40,
-      paddingHorizontal: 10,
-    },
   });
+};
 
 export default BankProductsScreen;

@@ -13,7 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-
+import {createCommonStyles} from '../../styles/common';
 import MainScreenHeader from '../../components/MainScreenHeader';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
@@ -104,9 +104,9 @@ function FAQsScreen() {
         icon="gear"
         onIconPress={() => navigation.navigate('Settings')}
       />
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.mainTitle}>Valores a Receber</Text>
+      <View style={styles.pageContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.title}>Valores a Receber</Text>
           <Text style={styles.subtitle}>
             Valores que você têm direito a receber de bancos e instituições
             financeiras.
@@ -120,34 +120,10 @@ function FAQsScreen() {
   );
 }
 
-const createStyles = (colors: Theme) =>
-  StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: colors.backgroundColor,
-    },
-    container: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    scrollContent: {
-      paddingHorizontal: 20,
-      paddingBottom: 20,
-    },
-    mainTitle: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      color: colors.text,
-      textAlign: 'center',
-      marginTop: 20,
-    },
-    subtitle: {
-      fontSize: 16,
-      color: colors.text,
-      textAlign: 'center',
-      marginTop: 8,
-      marginBottom: 30,
-    },
+const createStyles = (colors: Theme) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
     accordionContainer: {
       backgroundColor: colors.cardBackgroundColor,
       borderRadius: 24,
@@ -178,5 +154,6 @@ const createStyles = (colors: Theme) =>
       lineHeight: 21,
     },
   });
+};
 
 export default FAQsScreen;
