@@ -9,7 +9,7 @@ interface SecondaryButtonProps {
   onPress: () => void;
 }
 
-export default function PrimaryButton({
+export default function SecondaryButton({
   width = 250,
   text,
   icon,
