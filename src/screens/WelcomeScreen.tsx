@@ -13,7 +13,7 @@ import {useTheme} from '../contexts/ThemeContext';
 import {createCommonStyles} from '../styles/common';
 
 type RootStackParamList = {
-  GovBrLogin: undefined;
+  GovBrRequirements: undefined;
 };
 
 function WelcomeScreen() {
@@ -22,7 +22,7 @@ function WelcomeScreen() {
   const styles = createStyles(colors);
 
   const handleStart = () => {
-    navigation.navigate('GovBrLogin');
+    navigation.navigate('GovBrRequirements');
   };
 
   return (
@@ -110,7 +110,7 @@ const createStyles = (colors: any) => {
       height: 50,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 30,
+      marginBottom: 20,
     },
     buttonText: {
       color: '#FFFFFF',
