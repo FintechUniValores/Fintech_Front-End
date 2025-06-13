@@ -1,5 +1,12 @@
-import React from 'react';
-import {View, Text, StyleSheet, SafeAreaView, ScrollView} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -7,33 +14,12 @@ import MainScreenHeader from '../../components/MainScreenHeader';
 import {createCommonStyles} from '../../styles/common';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
+import {useSession} from '../../hooks/useSession';
+import {authenticatedFetch} from '../../services/api';
 
 type RootStackParamList = {
   Settings: undefined;
 };
-
-const productsData = [
-  {
-    title: 'Renda Fixa',
-    icon: 'money-bill-wave',
-    features: [
-      'Isenção de IR',
-      'Liquidez',
-      'Previsibilidade',
-      'Garantia do FGC',
-    ],
-  },
-  {
-    title: 'Poupança Fácil',
-    icon: 'piggy-bank',
-    features: [
-      'Isenção de IR',
-      'Liquidez diária',
-      'Garantia do FGC',
-      'Cobertura automática',
-    ],
-  },
-];
 
 interface ProductCardProps {
   product: {
@@ -58,15 +44,48 @@ const ProductCard: React.FC<ProductCardProps> = ({product, colors}) => {
           </Text>
         ))}
       </View>
-      <Text style={styles.cardLink}>Mais detalhes →</Text>
+      <View style={styles.cardLink}>
+        <Text style={styles.infoText}>Mais detalhes</Text>
+        <Icon
+          name="arrow-right"
+          size={15}
+          color={colors.primary}
+          style={{marginLeft: 5}}
+        />
+      </View>
     </View>
   );
 };
+
+interface Product {
+  title: string;
+  icon: string;
+  features: string[];
+}
 
 function BankProductsScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {colors} = useTheme();
   const styles = createStyles(colors);
+  const {sessionId} = useSession();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoadingApi, setIsLoadingApi] = useState(true);
+
+  useEffect(() => {
+    if (sessionId) {
+      setIsLoadingApi(true);
+      authenticatedFetch('/content/products', {}, sessionId)
+        .then(data => {
+          setProducts(data);
+        })
+        .catch(error => {
+          console.error('Erro ao buscar Bank Products:', error);
+        })
+        .finally(() => {
+          setIsLoadingApi(false);
+        });
+    }
+  }, [sessionId]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -76,22 +95,30 @@ function BankProductsScreen() {
         onIconPress={() => navigation.navigate('Settings')}
       />
       <View style={styles.pageContainer}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Otimize Seus Valores com Bradesco</Text>
-          <Text style={styles.subtitle}>
-            Recebeu valores? Centralize seu dinheiro em sua conta e descubra
-            novas oportunidades para ele render!
-          </Text>
-          <View style={styles.cardsRow}>
-            {productsData.map((product, index) => (
-              <ProductCard key={index} product={product} colors={colors} />
-            ))}
-          </View>
-          <Text style={styles.infoText}>
-            As informações são sugestões. Consulte um especialista para decisões
-            financeiras personalizadas.
-          </Text>
-        </ScrollView>
+        {isLoadingApi ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            style={{marginTop: 50}}
+          />
+        ) : (
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <Text style={styles.title}>Otimize Seus Valores com Bradesco</Text>
+            <Text style={styles.subtitle}>
+              Recebeu valores? Centralize seu dinheiro em sua conta e descubra
+              novas oportunidades para ele render!
+            </Text>
+            <View style={styles.cardsRow}>
+              {products.map((product, index) => (
+                <ProductCard key={index} product={product} colors={colors} />
+              ))}
+            </View>
+            <Text style={styles.infoText}>
+              As informações são sugestões. Consulte um especialista para
+              decisões financeiras personalizadas.
+            </Text>
+          </ScrollView>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -112,6 +139,7 @@ const createStyles = (colors: Theme) => {
     cardsRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+      flexWrap: 'wrap',
     },
     card: {
       ...commonStyles.card,
@@ -134,10 +162,14 @@ const createStyles = (colors: Theme) => {
       lineHeight: 20,
     },
     cardLink: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: colors.primary,
+      flexDirection: 'row',
+      alignItems: 'center',
       alignSelf: 'flex-end',
+      marginTop: 'auto',
+    },
+    infoText: {
+      ...commonStyles.infoText,
+      marginBottom: 0,
     },
   });
 };

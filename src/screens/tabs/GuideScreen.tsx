@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import MainScreenHeader from '../../components/MainScreenHeader';
@@ -17,6 +18,8 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {createCommonStyles} from '../../styles/common';
 import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
+import {useSession} from '../../hooks/useSession';
+import {authenticatedFetch} from '../../services/api';
 
 type RootStackParamList = {
   Settings: undefined;
@@ -29,31 +32,8 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const guideData = [
-  {
-    title: 'Com Pix Diponível',
-    content:
-      'selecione uma de suas chaves Pix (campo obrigatório) e informe seus dados pessoais; e guarde o número de protocolo, para entrar em contato com a instituição, se necessário. Observações: nesse caso, você receberá o valor em até 12 dias úteis; mesmo que você tenha indicado a chave Pix, a instituição pode devolver por TED ou DOC para a conta da chave Pix selecionada; e a instituição pode entrar em contato pelo telefone ou pelo e-mail indicado por você para confirmar sua identidade ou tirar  dúvidas sobre a forma de devolução. Esse é um procedimento para sua segurança e da instituição. Mas não forneça senhas a ninguém.',
-  },
-  {
-    title: 'Sem Pix Disponível',
-    content:
-      'Entre em contato diretamente com a instituição financeira pelo telefone ou pelo e-mail informado por ela para combinar a forma de devolução. Nesse caso, a instituição financeira não é obrigada a devolver o valor em até 12 dias úteis; ou se preferir, crie uma chave Pix e volte ao sistema para solicitar o valor.',
-  },
-  {
-    title: 'Não Ofereceu Solicitar Aqui',
-    content:
-      'Entre em contato diretamente com a instituição financeira pelo telefone ou pelo e-mail informado por ela para combinar a forma de devolução. Nesse caso, a instituição financeira não é obrigada a devolver o valor em até 12 dias úteis.',
-  },
-  {
-    title: 'Observação Sobre Valores Acima De R$ 100 E 2FA',
-    content:
-      'Entre no seu aplicativo gov.br e ative o duplo fator de autenticação, depois acesse novamente o SVR e solicite o resgate do valor normalmente.',
-  },
-];
-
 interface AccordionItemProps {
-  item: {title: string; content: string};
+  item: Guide;
   colors: Theme;
 }
 
@@ -79,17 +59,49 @@ const AccordionItem: React.FC<AccordionItemProps> = ({item, colors}) => {
       </Pressable>
       {expanded && (
         <View style={styles.accordionContent}>
-          <Text style={styles.accordionText}>{item.content}</Text>
+          {item.steps.map((step, index) => (
+            <Text key={index} style={styles.accordionText}>
+              {`• ${step}`}
+            </Text>
+          ))}
         </View>
       )}
     </View>
   );
 };
 
+interface Guide {
+  title: string;
+  steps: string[];
+}
+
 function GuideScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {colors} = useTheme();
   const styles = createStyles(colors);
+  const {sessionId} = useSession();
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [isLoadingApi, setIsLoadingApi] = useState(true);
+
+  useEffect(() => {
+    if (sessionId) {
+      setIsLoadingApi(true);
+      authenticatedFetch('/content/guides', {}, sessionId)
+        .then((data: Guide[]) => {
+          setGuides(data);
+        })
+        .catch(error => {
+          console.error('Erro ao buscar Guides:', error);
+          setGuides([]);
+        })
+        .finally(() => {
+          setIsLoadingApi(false);
+        });
+    } else {
+      setIsLoadingApi(false);
+      setGuides([]);
+    }
+  }, [sessionId]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -99,16 +111,24 @@ function GuideScreen() {
         onIconPress={() => navigation.navigate('Settings')}
       />
       <View style={styles.pageContainer}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Como Resgatar Seus Valores</Text>
-          <Text style={styles.subtitle}>
-            Esperamos que você tenha encontrado boas notícias Agora, veja como
-            resgatar:
-          </Text>
-          {guideData.map((item, index) => (
-            <AccordionItem key={index} item={item} colors={colors} />
-          ))}
-        </ScrollView>
+        {isLoadingApi ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            style={{marginTop: 50}}
+          />
+        ) : (
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <Text style={styles.title}>Como Resgatar Seus Valores</Text>
+            <Text style={styles.subtitle}>
+              Esperamos que você tenha encontrado boas notícias Agora, veja como
+              resgatar:
+            </Text>
+            {guides.map((guideItem, index) => (
+              <AccordionItem key={index} item={guideItem} colors={colors} />
+            ))}
+          </ScrollView>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -120,7 +140,7 @@ const createStyles = (colors: Theme) => {
     ...commonStyles,
     accordionContainer: {
       backgroundColor: colors.cardBackgroundColor,
-      borderRadius: 24,
+      borderRadius: 16,
       marginBottom: 15,
       overflow: 'hidden',
       borderWidth: 2,
@@ -143,9 +163,10 @@ const createStyles = (colors: Theme) => {
       paddingBottom: 15,
     },
     accordionText: {
-      fontSize: 14,
+      fontSize: 15,
       color: colors.secondaryText,
-      lineHeight: 21,
+      lineHeight: 24,
+      textAlign: 'justify',
     },
   });
 };
