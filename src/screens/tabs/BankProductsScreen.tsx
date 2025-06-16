@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useNavigation} from '@react-navigation/native';
@@ -16,21 +17,23 @@ import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
 import {useSession} from '../../hooks/useSession';
 import {authenticatedFetch} from '../../services/api';
+import {WebView} from 'react-native-webview';
 
 type RootStackParamList = {
   Settings: undefined;
 };
 
 interface ProductCardProps {
-  product: {
-    title: string;
-    icon: string;
-    features: string[];
-  };
+  product: Product;
   colors: Theme;
+  onDetailsPress: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({product, colors}) => {
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  colors,
+  onDetailsPress,
+}) => {
   const styles = createStyles(colors);
 
   return (
@@ -44,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({product, colors}) => {
           </Text>
         ))}
       </View>
-      <View style={styles.cardLink}>
+      <Pressable style={styles.cardLink} onPress={onDetailsPress}>
         <Text style={styles.infoText}>Mais detalhes</Text>
         <Icon
           name="arrow-right"
@@ -52,7 +55,7 @@ const ProductCard: React.FC<ProductCardProps> = ({product, colors}) => {
           color={colors.primary}
           style={{marginLeft: 5}}
         />
-      </View>
+      </Pressable>
     </View>
   );
 };
@@ -61,6 +64,7 @@ interface Product {
   title: string;
   icon: string;
   features: string[];
+  link: string;
 }
 
 function BankProductsScreen() {
@@ -70,6 +74,8 @@ function BankProductsScreen() {
   const {sessionId} = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingApi, setIsLoadingApi] = useState(true);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [isLoadingWebView, setIsLoadingWebView] = useState(true);
 
   useEffect(() => {
     if (sessionId) {
@@ -86,6 +92,41 @@ function BankProductsScreen() {
         });
     }
   }, [sessionId]);
+
+  const handleProductPress = (url: string) => {
+    setSelectedUrl(url);
+    setIsLoadingWebView(true);
+  };
+
+  const handleCloseWebView = () => {
+    setSelectedUrl(null);
+  };
+
+  if (selectedUrl) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <MainScreenHeader
+          title="Detalhes do Produto"
+          icon="xmark"
+          onIconPress={handleCloseWebView}
+        />
+        <View style={styles.webViewContainer}>
+          <WebView
+            source={{uri: selectedUrl}}
+            onLoadStart={() => setIsLoadingWebView(true)}
+            onLoadEnd={() => setIsLoadingWebView(false)}
+          />
+          {isLoadingWebView && (
+            <ActivityIndicator
+              style={styles.loadingIndicator}
+              size="large"
+              color={colors.primary}
+            />
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -110,7 +151,12 @@ function BankProductsScreen() {
             </Text>
             <View style={styles.cardsRow}>
               {products.map((product, index) => (
-                <ProductCard key={index} product={product} colors={colors} />
+                <ProductCard
+                  key={index}
+                  product={product}
+                  colors={colors}
+                  onDetailsPress={() => handleProductPress(product.link)}
+                />
               ))}
             </View>
             <Text style={styles.infoText}>
@@ -144,7 +190,7 @@ const createStyles = (colors: Theme) => {
     card: {
       ...commonStyles.card,
       width: '48%',
-      alignItems: 'flex-start',
+      alignItems: 'center',
     },
     cardTitle: {
       fontSize: 18,
@@ -155,6 +201,7 @@ const createStyles = (colors: Theme) => {
     },
     featuresContainer: {
       marginBottom: 15,
+      alignSelf: 'flex-start',
     },
     featureText: {
       fontSize: 14,
@@ -164,12 +211,26 @@ const createStyles = (colors: Theme) => {
     cardLink: {
       flexDirection: 'row',
       alignItems: 'center',
-      alignSelf: 'flex-end',
       marginTop: 'auto',
     },
     infoText: {
       ...commonStyles.infoText,
       marginBottom: 0,
+    },
+    webViewContainer: {
+      flex: 1,
+      backgroundColor: colors.backgroundColor,
+      paddingBottom: 30,
+      marginTop: -60,
+    },
+    loadingIndicator: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 };

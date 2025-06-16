@@ -20,6 +20,8 @@ import {useTheme} from '../../contexts/ThemeContext';
 import {Theme} from '../../config/themes';
 import {useSession} from '../../hooks/useSession';
 import {authenticatedFetch} from '../../services/api';
+import PrimaryButton from '../../components/PrimaryButton';
+import {WebView} from 'react-native-webview';
 
 type RootStackParamList = {
   Settings: undefined;
@@ -82,6 +84,8 @@ function GuideScreen() {
   const {sessionId} = useSession();
   const [guides, setGuides] = useState<Guide[]>([]);
   const [isLoadingApi, setIsLoadingApi] = useState(true);
+  const [isWebViewVisible, setWebViewVisible] = useState(false);
+  const [isLoadingWebView, setIsLoadingWebView] = useState(true);
 
   useEffect(() => {
     if (sessionId) {
@@ -102,6 +106,41 @@ function GuideScreen() {
       setGuides([]);
     }
   }, [sessionId]);
+
+  const handleShowWebView = () => {
+    setWebViewVisible(true);
+  };
+
+  const handleCloseWebView = () => {
+    setWebViewVisible(false);
+    setIsLoadingWebView(true);
+  };
+
+  if (isWebViewVisible) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <MainScreenHeader
+          title="Consulta no Banco Central"
+          icon="xmark"
+          onIconPress={handleCloseWebView}
+        />
+        <View style={styles.webViewContainer}>
+          <WebView
+            source={{uri: 'https://valoresareceber.bcb.gov.br/publico'}}
+            onLoadStart={() => setIsLoadingWebView(true)}
+            onLoadEnd={() => setIsLoadingWebView(false)}
+          />
+          {isLoadingWebView && (
+            <ActivityIndicator
+              style={styles.loadingIndicator}
+              size="large"
+              color={colors.primary}
+            />
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -127,6 +166,12 @@ function GuideScreen() {
             {guides.map((guideItem, index) => (
               <AccordionItem key={index} item={guideItem} colors={colors} />
             ))}
+            <PrimaryButton
+              text="Consultar Novamente"
+              icon="arrow-right"
+              width={'100%'}
+              onPress={handleShowWebView}
+            />
           </ScrollView>
         )}
       </View>
@@ -138,6 +183,10 @@ const createStyles = (colors: Theme) => {
   const commonStyles = createCommonStyles(colors);
   return StyleSheet.create({
     ...commonStyles,
+    pageContainer: {
+      ...commonStyles.pageContainer,
+      paddingHorizontal: 0,
+    },
     accordionContainer: {
       backgroundColor: colors.cardBackgroundColor,
       borderRadius: 16,
@@ -167,6 +216,21 @@ const createStyles = (colors: Theme) => {
       color: colors.secondaryText,
       lineHeight: 24,
       textAlign: 'justify',
+    },
+    webViewContainer: {
+      flex: 1,
+      backgroundColor: colors.backgroundColor,
+      paddingBottom: 30,
+      marginTop: -60,
+    },
+    loadingIndicator: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 };

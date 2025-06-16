@@ -142,6 +142,10 @@ const createStyles = (colors: Theme) => {
   const commonStyles = createCommonStyles(colors);
   return StyleSheet.create({
     ...commonStyles,
+    pageContainer: {
+      ...commonStyles.pageContainer,
+      paddingHorizontal: 0,
+    },
     accordionContainer: {
       backgroundColor: colors.cardBackgroundColor,
       borderRadius: 16,
