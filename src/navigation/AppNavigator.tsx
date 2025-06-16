@@ -14,7 +14,7 @@ import SettingsScreen from '../screens/tabs/SettingsScreen';
 const Stack = createStackNavigator();
 
 function AppNavigationStack() {
-  const {isLoading: isSessionLoading} = useSession();
+  const {isLoading: isSessionLoading, sessionId} = useSession();
   const {colors} = useTheme();
 
   if (isSessionLoading) {
@@ -31,9 +31,11 @@ function AppNavigationStack() {
     );
   }
 
+  const initialRoute = sessionId ? 'PosConsult' : 'Welcome';
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen
           name="Welcome"
           component={WelcomeScreen}
