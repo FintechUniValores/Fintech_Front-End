@@ -9,16 +9,20 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {StackNavigationProp} from '@react-navigation/stack';
+import {useTheme} from '../contexts/ThemeContext';
+import {createCommonStyles} from '../styles/common';
 
 type RootStackParamList = {
-  GovBrLogin: undefined;
+  GovBrRequirements: undefined;
 };
 
 function WelcomeScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {colors} = useTheme();
+  const styles = createStyles(colors);
 
   const handleStart = () => {
-    navigation.navigate('GovBrLogin');
+    navigation.navigate('GovBrRequirements');
   };
 
   return (
@@ -54,79 +58,65 @@ function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    position: 'relative',
-    overflow: 'hidden',
-    paddingBottom: 60,
-  },
-  backgroundImage: {
-    width: '100%',
-    height: 250,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-  },
-  logoContainer: {
-    width: '100%',
-    aspectRatio: 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 60,
-    height: 250,
-  },
-  logo: {
-    width: 250,
-    height: 250,
-    shadowColor: '#333333',
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 10,
-  },
-  center: {
-    flex: 1,
-    marginTop: 70,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  noMarginTop: {
-    marginTop: 0,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333333',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#333333',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  button: {
-    backgroundColor: '#CD0B30',
-    borderRadius: 25,
-    width: 250,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 'auto',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-});
+const createStyles = (colors: any) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
+    container: {
+      ...commonStyles.pageContainer,
+      padding: 0,
+    },
+    backgroundImage: {
+      width: '100%',
+      height: 250,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+    },
+    logoContainer: {
+      width: '100%',
+      aspectRatio: 3,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 60,
+      height: 250,
+    },
+    logo: {
+      width: 250,
+      height: 250,
+      shadowColor: '#333333',
+      shadowOffset: {width: 0, height: 8},
+      shadowOpacity: 0.25,
+      shadowRadius: 6,
+      elevation: 10,
+    },
+    center: {
+      flex: 1,
+      marginTop: 70,
+      alignItems: 'center',
+      paddingHorizontal: 10,
+    },
+    noMarginTop: {
+      marginTop: 0,
+    },
+    title: {
+      ...commonStyles.title,
+      fontSize: 24,
+    },
+    button: {
+      backgroundColor: '#CD0B30',
+      borderRadius: 25,
+      width: 250,
+      height: 50,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+    },
+    buttonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+    },
+  });
+};
 
 export default WelcomeScreen;

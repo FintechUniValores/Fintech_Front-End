@@ -1,144 +1,151 @@
-import React from 'react';
-import {View, Text, StyleSheet, Pressable, SafeAreaView} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ActivityIndicator,
+  ScrollView,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {lightTheme} from '../config/themes';
-import Icon from 'react-native-vector-icons/FontAwesome6';
-import ScreenHeader from '../components/ScreenHeader';
 import {StackNavigationProp} from '@react-navigation/stack';
 
+import {useTheme} from '../contexts/ThemeContext';
+import {useSession} from '../hooks/useSession';
+import {authenticatedFetch} from '../services/api';
+import {createCommonStyles} from '../styles/common';
+import uuid from 'react-native-uuid';
+
+import ScreenHeader from '../components/ScreenHeader';
+import PrimaryButton from '../components/PrimaryButton';
+
+interface InstructionalCard {
+  title: string;
+  steps: string[];
+}
+
 type RootStackParamList = {
-  GovBrLogin: undefined;
+  SvrConsult: undefined;
 };
 
 function GovBrRequirementsScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {colors} = useTheme();
+  const styles = createStyles(colors);
+  const {sessionId, createSession} = useSession();
+
+  const [cards, setCards] = useState<InstructionalCard[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const ensureSessionAndFetch = async () => {
+      let id = sessionId;
+      if (!id) {
+        id = uuid.v4() as string;
+        await createSession(id);
+      }
+      setIsLoading(true);
+      authenticatedFetch('/content/gov-requirements', {}, id)
+        .then(data => {
+          setCards(data);
+        })
+        .catch(error => {
+          console.error('Erro ao buscar requisitos do Gov.br:', error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    };
+    ensureSessionAndFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <ActivityIndicator size="large" color={colors.primary} />;
+    }
+
+    return (
+      <>
+        {cards.map((card, index) => (
+          <View key={index} style={styles.card}>
+            <Text style={styles.cardTitle}>{card.title}</Text>
+            {card.steps.map((step, stepIndex) => (
+              <Text key={stepIndex} style={styles.cardText}>
+                {step}
+              </Text>
+            ))}
+          </View>
+        ))}
+      </>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <ScreenHeader
-          title="Atenção!"
-          subtitle="Sua conta Gov.br precisa de ajustes"
-        />
-        <View style={styles.center}>
+      <View style={styles.pageContainer}>
+        <ScreenHeader title="Atenção!" />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.paragraph}>
             Para acessar o Sistema Valores a Receber (SVR) do Banco Central, sua
             conta Gov.br precisa ser nível Prata ou Ouro e ter a autenticação de
             2 fatores habilitada.
           </Text>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              Como elevar o nível da sua conta
-            </Text>
-            <Text style={styles.cardText}>1. Abra o app Gov.br.</Text>
-            <Text style={styles.cardText}>
-              2. Valide sua face ou cadastre-se via banco credenciado.
-            </Text>
-            <Pressable
-              onPress={() => {
-                navigation.navigate('GovBrLogin');
-              }}
-              style={styles.cardButton}>
-              <Text
-                style={[styles.cardButtonText, {color: lightTheme.primary}]}>
-                Mais detalhes
-              </Text>
-              <Icon
-                name="arrow-right"
-                size={15}
-                color={lightTheme.primary}
-                style={{marginLeft: 5}}
-              />
-            </Pressable>
-          </View>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Habilitar 2 Fatores (2FA)</Text>
-            <Text style={styles.cardText}>
-              1. No app Gov.br, vá em 'Segurança'.
-            </Text>
-            <Text style={styles.cardText}>
-              2. Ative a 'Verificação em duas etapas’.
-            </Text>
-            <Pressable
-              onPress={() => {
-                navigation.navigate('GovBrLogin');
-              }}
-              style={styles.cardButton}>
-              <Text
-                style={[styles.cardButtonText, {color: lightTheme.primary}]}>
-                Mais detalhes
-              </Text>
-              <Icon
-                name="arrow-right"
-                size={15}
-                color={lightTheme.primary}
-                style={{marginLeft: 5}}
-              />
-            </Pressable>
-          </View>
-        </View>
+
+          {renderContent()}
+        </ScrollView>
+        <PrimaryButton
+          text="Entendi"
+          icon="arrow-right"
+          onPress={() => {
+            navigation.navigate('SvrConsult');
+          }}
+        />
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: lightTheme.backgroundColor,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  center: {
-    alignItems: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 20,
-    width: '100%',
-  },
-  paragraph: {
-    fontSize: 16,
-    color: lightTheme.text,
-    lineHeight: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: lightTheme.cardBackgroundColor,
-    borderRadius: 15,
-    padding: 20,
-    width: '100%',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: lightTheme.text,
-    marginBottom: 10,
-  },
-  cardText: {
-    fontSize: 16,
-    color: lightTheme.text,
-    lineHeight: 24,
-    marginBottom: 10,
-  },
-  cardButton: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardButtonText: {
-    fontSize: 16,
-    color: lightTheme.primary,
-  },
-});
+const createStyles = (colors: any) => {
+  const commonStyles = createCommonStyles(colors);
+  return StyleSheet.create({
+    ...commonStyles,
+    pageContainer: {
+      ...commonStyles.pageContainer,
+      justifyContent: 'space-between',
+      paddingHorizontal: 0,
+      paddingTop: 0,
+    },
+    scrollContainer: {
+      ...commonStyles.scrollContainer,
+      marginTop: 80,
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      justifyContent: 'center',
+    },
+    paragraph: {
+      ...commonStyles.paragraph,
+      marginBottom: 30,
+    },
+    card: {
+      ...commonStyles.card,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 10,
+    },
+    cardText: {
+      fontSize: 16,
+      color: colors.text,
+      lineHeight: 24,
+      marginBottom: 10,
+    },
+  });
+};
 
 export default GovBrRequirementsScreen;
