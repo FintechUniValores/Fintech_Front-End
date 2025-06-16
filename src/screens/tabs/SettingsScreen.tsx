@@ -8,8 +8,16 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {useNavigation, StackActions} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {useTheme} from '../../contexts/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const SESSION_ID_KEY = '@sessionId';
+
+type RootStackParamList = {
+  Welcome: undefined;
+};
 
 const SettingsHeader = ({title, colors}: {title: string; colors: any}) => {
   const navigation = useNavigation();
@@ -34,12 +42,15 @@ const SettingsHeader = ({title, colors}: {title: string; colors: any}) => {
 
 function SettingsScreen() {
   const {theme, colors, toggleTheme} = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const styles = createStyles(colors, theme);
 
-  const handleLogout = () => {
-    console.log('Logout Pressionado');
-    navigation.dispatch(StackActions.popToTop());
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem(SESSION_ID_KEY);
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Welcome'}],
+    });
   };
 
   return (

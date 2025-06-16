@@ -14,6 +14,7 @@ import {useTheme} from '../contexts/ThemeContext';
 import {useSession} from '../hooks/useSession';
 import {authenticatedFetch} from '../services/api';
 import {createCommonStyles} from '../styles/common';
+import uuid from 'react-native-uuid';
 
 import ScreenHeader from '../components/ScreenHeader';
 import PrimaryButton from '../components/PrimaryButton';
@@ -30,15 +31,21 @@ type RootStackParamList = {
 function GovBrRequirementsScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {colors} = useTheme();
-  const {sessionId} = useSession();
   const styles = createStyles(colors);
+  const {sessionId, createSession} = useSession();
 
   const [cards, setCards] = useState<InstructionalCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (sessionId) {
-      authenticatedFetch('/content/gov-requirements', {}, sessionId)
+    const ensureSessionAndFetch = async () => {
+      let id = sessionId;
+      if (!id) {
+        id = uuid.v4() as string;
+        await createSession(id);
+      }
+      setIsLoading(true);
+      authenticatedFetch('/content/gov-requirements', {}, id)
         .then(data => {
           setCards(data);
         })
@@ -48,7 +55,9 @@ function GovBrRequirementsScreen() {
         .finally(() => {
           setIsLoading(false);
         });
-    }
+    };
+    ensureSessionAndFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const renderContent = () => {
@@ -75,10 +84,7 @@ function GovBrRequirementsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.pageContainer}>
-        <ScreenHeader
-          title="Atenção!"
-          subtitle="Sua conta Gov.br precisa de ajustes"
-        />
+        <ScreenHeader title="Atenção!" />
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.paragraph}>
             Para acessar o Sistema Valores a Receber (SVR) do Banco Central, sua
