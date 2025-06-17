@@ -1,4 +1,39 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Resgate Fácil – Front-End
+
+Este é o front-end do aplicativo **Resgate Fácil**, desenvolvido em [React Native](https://reactnative.dev) para proporcionar uma experiência mobile moderna, fluida e segura para usuários que desejam consultar e resgatar valores a receber de instituições financeiras.
+
+O app utiliza as APIs do backend para consulta e exibição de dados, sendo toda a comunicação feita de forma segura com o [Firebase](https://firebase.google.com/), que gerencia autenticação, armazenamento e integrações em tempo real.
+
+---
+
+## Principais Funcionalidades
+
+- **Consulta de valores a receber**: Integração com as APIs do backend para buscar informações de valores disponíveis para o usuário.
+- **Guia de resgate**: Passo a passo dinâmico para orientar o usuário sobre como resgatar seus valores.
+- **Produtos e dicas financeiras**: Sugestões personalizadas de produtos bancários e orientações para o usuário após o resgate.
+- **Perguntas frequentes (FAQ)**: Seção interativa para esclarecer dúvidas comuns sobre o processo.
+- **Configurações e tema**: Alternância entre tema claro/escuro e gerenciamento de sessão.
+
+---
+
+## Arquitetura
+
+- **React Native**: Framework principal para desenvolvimento mobile multiplataforma.
+- **APIs Backend**: Toda a lógica de negócio, autenticação e dados é fornecida por APIs REST hospedadas e gerenciadas pelo backend.
+- **Firebase**: Utilizado pelo backend para autenticação, armazenamento de dados e notificações.
+- **AsyncStorage**: Gerenciamento local de sessão do usuário.
+
+---
+
+## Como funciona a comunicação com o backend?
+
+O app utiliza um sistema de sessão único para cada usuário, armazenando um `sessionId` localmente. Todas as requisições para as APIs do backend incluem esse identificador, garantindo rastreabilidade e segurança. O backend, por sua vez, utiliza o Firebase para autenticação, persistência e gerenciamento dos dados do usuário.
+
+---
+
+## Como rodar o projeto
+
+Siga as instruções abaixo para instalar as dependências, rodar o Metro bundler e executar o app em seu emulador ou dispositivo físico.
 
 # Getting Started
 
